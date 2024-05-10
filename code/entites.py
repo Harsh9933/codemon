@@ -15,7 +15,7 @@ class Entity(pygame.sprite.Sprite):
         self.speed = 250
         self.frame_index, self.frames = 0, frames
         self.image = self.frames[self.get_state()][self.frame_index]
-        self.rect = self.image.get_frect(center=pos)
+        self.rect = self.image.get_frect(midbottom=pos)
         self.hitbox = self.rect.inflate(-self.rect.width /2, -60)
 
     def animate(self, dt):
@@ -37,20 +37,20 @@ class Entity(pygame.sprite.Sprite):
 
 
 class Player(Entity):
-    def __init__(self, pos, frames, groups, collision_sprite):
+    def __init__(self, pos, frames, groups):
         super().__init__(pos, frames, groups)
-        self.collision_sprite
 
     def input(self):
+
         keys = pygame.key.get_pressed()
         input_vector = vector(0, 0)
-        if keys[pygame.K_w]:
+        if keys[pygame.K_UP]:
             input_vector.y -= 1
-        if keys[pygame.K_s]:
+        if keys[pygame.K_DOWN]:
             input_vector.y += 1
-        if keys[pygame.K_a]:
+        if keys[pygame.K_LEFT]:
             input_vector.x -= 1
-        if keys[pygame.K_d]:
+        if keys[pygame.K_RIGHT]:
             input_vector.x += 1
         self.direction = input_vector
 
@@ -59,7 +59,7 @@ class Player(Entity):
         self.hitbox.center = self.rect.center
 
     def collision(self, axis):
-        for sprite in self.collision_sprite =
+        pass
 
     def update(self, dt):
         self.input()

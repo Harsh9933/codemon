@@ -1,5 +1,4 @@
 import pygame
-
 from settings import *
 from pytmx.util_pygame import load_pygame
 from os.path import join
@@ -70,16 +69,16 @@ class Game:
                 if obj.properties['pos'] == player_start_pos:
                     self.player = Player(
                         pos=(obj.x, obj.y),
-                        frames=self.overworld_frames['characters']['player'],
-                        groups=self.all_sprites
-                        collision_sprites = self.collision_sprites)
+                        frames=self.overworld_frames['characters']['young_guy'],
+                        groups=self.all_sprites,
+                        )
             else:
                  self.character = Character(
                     pos=(obj.x, obj.y),
                     frames=self.overworld_frames['characters'][graphic],
                     groups=(self.all_sprites, self.collision_sprites)
                 )
-        
+
 
 
     def run(self):
