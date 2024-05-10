@@ -15,7 +15,7 @@ class Arena:
         self.display_surface = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
         pygame.display.set_caption('codemon')
         self.clock = pygame.time.Clock()
-
+        self.flag=0
         self.all_sprites = AllSprites()
         self.collision_sprites = pygame.sprite.Group()
         self.import_assets()
@@ -91,9 +91,9 @@ class Arena:
             self.display_surface.fill('black')
             self.all_sprites.draw(self.player.rect.center)
 
-            pygame.draw.rect(self.display_surface,(250, 250, 250),self.input_rect,5)
+            pygame.draw.rect(self.display_surface,(250, 250, 250, 100),self.input_rect,5)
 
-            text_surface = self.font.render(self.user_text,True, (0, 0, 0))
+            text_surface = self.font.render(self.user_text,True, (164, 22, 246))
             self.display_surface.blit(text_surface, (self.input_rect.x + 10,  self.input_rect.y + 10))
             self.input_rect.w = text_surface.get_width()+10
             # text = ''
@@ -102,8 +102,31 @@ class Arena:
             # self.all_sprites.draw(self.player.rect.center)
             # pygame.draw.rect(self.display_surface, (255, 255, 255), (650, 500, 800, 230))
             # # pygame.draw.rect(self.display_surface,[66, 135, 245], [50, 500, 50])
+            if self.user_text=='Move();' and self.flag<2:
+                new_x = self.player.rect.x + 60
+                self.player.rect.x = new_x
+                self.user_text = ''
+                self.flag+=1
+            elif self.user_text=='While Move():' and self.flag<450:
+                new_x = self.player.rect.x + 2
+                self.player.rect.x = new_x
+                self.flag+=1
+                if self.flag==449:
+                    self.user_text = ''
+            elif self.user_text=='Down();' and self.flag<451:
+                new_y = self.player.rect.y  + 60
+                self.flag+=1
+                self.user_text = ''
+                self.player.rect.y = new_y
+                score_surface = self.font.render('YOU WON', True, "red")
+                score_rect = score_surface.get_rect(center=(400, 50))
+                self.display_surface.blit(score_surface, score_rect)
 
-
+            elif self.user_text=='Up();' and self.flag<1:
+                new_y = self.player.rect.y - 60
+                self.flag+=1
+                self.user_text = ''
+                self.player.rect.y = new_y
             pygame.display.update()
 
 
