@@ -9,12 +9,14 @@ from os.path import join
 class Entity(pygame.sprite.Sprite):
     def __init__(self, pos, frames, groups):
         super().__init__(groups)
+        self.z = WORLD_LAYERS['main']
         self.direction = vector()
         self.facing_direction = 'down'
         self.speed = 250
         self.frame_index, self.frames = 0, frames
         self.image = self.frames[self.get_state()][self.frame_index]
         self.rect = self.image.get_frect(center=pos)
+        self.hitbox = self.rect.inflate(-self.rect.width /2, -60)
 
     def animate(self, dt):
         self.frame_index += ANIMATION_SPEED * dt
@@ -35,9 +37,9 @@ class Entity(pygame.sprite.Sprite):
 
 
 class Player(Entity):
-    def __init__(self, pos, frames, groups):
+    def __init__(self, pos, frames, groups, collision_sprite):
         super().__init__(pos, frames, groups)
-
+        self.collision_sprite
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -54,6 +56,10 @@ class Player(Entity):
 
     def move(self, dt):
         self.rect.center += (self.direction * self.speed * dt)
+        self.hitbox.center = self.rect.center
+
+    def collision(self, axis):
+        for sprite in self.collision_sprite =
 
     def update(self, dt):
         self.input()

@@ -3,7 +3,7 @@ import pygame
 from settings import *
 from pytmx.util_pygame import load_pygame
 from os.path import join
-from sprites import Sprite,AnimatedSprite
+from sprites import Sprite,AnimatedSprite ,BorderSprite
 from entites import Player,  Character
 from groups import AllSprites
 from support import *
@@ -18,7 +18,7 @@ class Game:
         self.clock = pygame.time.Clock()
 
         self.all_sprites = AllSprites()
-
+        self.collision_sprites = pygame.sprite.Group()
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
 
@@ -37,25 +37,32 @@ class Game:
 
     def setup(self, tmx_map, player_start_pos):
         for x, y, surf in tmx_map.get_layer_by_name('Terrain').tiles():
-            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites)
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites, z=WORLD_LAYERS['bg'])
 
         for x, y, surf in tmx_map.get_layer_by_name('Terrain Top').tiles():
-            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites)
+            Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites,  z=WORLD_LAYERS['bg'])
 
         for obj in tmx_map.get_layer_by_name('Objects'):
-            Sprite((obj.x, obj.y), obj.image, self.all_sprites)
+            if obj.name == 'top':
+                Sprite((obj.x, obj.y), obj.image, self.all_sprites,  z=WORLD_LAYERS['top'])
+            else:
+                Sprite((obj.x, obj.y), obj.image, (self.all_sprites, self.collision_sprites))
 
+        for obj in tmx_map.get_layer_by_name('Monsters'):
+            Sprite((obj.x, obj.y), obj.image, (self.all_sprites))
 
         for obj in tmx_map.get_layer_by_name('Water'):
             for x in range(int(obj.x), int(obj.x + obj.width), TILE_SIZE):
                 for y in range(int(obj.y), int(obj.y + obj.height), TILE_SIZE):
                     AnimatedSprite((x, y), self.overworld_frames['water'], self.all_sprites)
 
+        for obj in tmx_map.get_layer_by_name('Collisions'):
+            BorderSprite((obj.x, obj.y), pygame.Surface((obj.width, obj.height)), (self.collision_sprites))
 
         for obj in tmx_map.get_layer_by_name('Coast'):
             terrain = obj.properties['terrain']
             side = obj.properties['side']
-            AnimatedSprite((obj.x, obj.y), self.overworld_frames['coast'][terrain][side], self.all_sprites)
+            AnimatedSprite((obj.x, obj.y), self.overworld_frames['coast'][terrain][side], self.all_sprites,  z=WORLD_LAYERS['bg'])
 
         for obj in tmx_map.get_layer_by_name('Entities'):
             graphic = obj.properties.get('graphic', None)
@@ -64,12 +71,13 @@ class Game:
                     self.player = Player(
                         pos=(obj.x, obj.y),
                         frames=self.overworld_frames['characters']['player'],
-                        groups=self.all_sprites)
+                        groups=self.all_sprites
+                        collision_sprites = self.collision_sprites)
             else:
                  self.character = Character(
                     pos=(obj.x, obj.y),
                     frames=self.overworld_frames['characters'][graphic],
-                    groups=self.all_sprites
+                    groups=(self.all_sprites, self.collision_sprites)
                 )
         
 
