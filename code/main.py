@@ -2,10 +2,12 @@ import pygame
 from settings import *
 from pytmx.util_pygame import load_pygame
 from os.path import join
-from sprites import Sprite,AnimatedSprite ,BorderSprite
+from sprites import Sprite,AnimatedSprite ,BorderSprite, TransitionSprite
 from entites import Player,  Character
 from groups import AllSprites
 from support import *
+from dialog import *
+
 
 
 class Game:
@@ -20,6 +22,9 @@ class Game:
         self.collision_sprites = pygame.sprite.Group()
         self.import_assets()
         self.setup(self.tmx_maps['world'], 'house')
+        self.game_state = 'active'
+        self.transition_sprites = pygame.sprite.Group()
+
 
     def import_assets(self):
         self.tmx_maps = {
@@ -35,6 +40,12 @@ class Game:
 
 
     def setup(self, tmx_map, player_start_pos):
+        for obj in tmx_map.get_layer_by_name('Entities'):
+            if obj.name == 'Character':
+                char_id = obj.properties.get('character_id')
+                if char_id == 'o1':
+                    print("Dialog")
+
         for x, y, surf in tmx_map.get_layer_by_name('Terrain').tiles():
             Sprite((x * TILE_SIZE, y * TILE_SIZE), surf, self.all_sprites, z=WORLD_LAYERS['bg'])
 
@@ -70,7 +81,7 @@ class Game:
                     self.player = Player(
                         pos=(obj.x, obj.y),
                         frames=self.overworld_frames['characters']['young_guy'],
-                        groups=self.all_sprites,
+                        groups=self.all_sprites
                         )
             else:
                  self.character = Character(
@@ -79,19 +90,29 @@ class Game:
                     groups=(self.all_sprites, self.collision_sprites)
                 )
 
-
+    def create_dialog(self, character):
+        if not self.dialog_tree:
+            self.dialog_tree = DialogTree(character, self.player, self.all_sprites, self.fonts['dialog'],self.end_dialog)
+    def transition_check(self):
+        sprites = [sprite for sprite in self.transition_sprites if sprite.rect.colliderect(self.player.hitbox)]
+        if sprites:
+            self.player.block()
+            self.transition_target = sprites[0].target
 
     def run(self):
         while True:
-            dt = self.clock.tick() / 1000
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                    exit()
-            self.all_sprites.update(dt)
-            self.display_surface.fill('black')
-            self.all_sprites.draw(self.player.rect.center)
-            pygame.display.update()
+            if self.game_state == 'active':
+                dt = self.clock.tick() / 1000
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                        exit()
+                self.all_sprites.update(dt)
+                self.display_surface.fill('black')
+                self.transition_check()
+                self.all_sprites.draw(self.player.rect.center)
+                pygame.display.update()
+
 
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 import os.path
 
 import pygame
-
+from pytmx.util_pygame import load_pygame
 from settings import *
 from os.path import join
 
@@ -58,7 +58,7 @@ class Player(Entity):
         self.rect.center += (self.direction * self.speed * dt)
         self.hitbox.center = self.rect.center
 
-    def collision(self, axis):
+    def collision(self, axis, tmx_map):
         pass
 
     def update(self, dt):
